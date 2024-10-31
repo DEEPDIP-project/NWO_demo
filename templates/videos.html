@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Sync Player</title>
+  <style>
+    .video-container {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+    }
+    video {
+      width: 30%; /* Adjust as needed */
+      height: auto;
+    }
+    .control-bar {
+      width: 100%;
+      margin: 0 auto;
+    }
+    .toggle-controls {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+<button class="button-3" role="button" onclick="window.location.href='/'">NWO Demo</button>
+
+<div class="toggle-controls">
+  <label><input type="checkbox" id="toggle-test" checked> Video 1</label>
+  <label><input type="checkbox" id="toggle-test2" checked> Video 2</label>
+  <label><input type="checkbox" id="toggle-test3" checked> Video 3</label>
+</div>
+
+<div class="video-container">
+  <video id="test" src="static/fake_data/test.mp4" controls autoplay loop></video>
+  <video id="test2" src="static/fake_data/test2.mp4" controls autoplay loop></video>
+  <video id="test3" src="static/fake_data/test3.mp4" controls autoplay loop></video>
+</div>
+
+<div class="control-bar">
+  <input type="range" id="time-control" min="0" max="100" value="0" step="0.1">
+</div>
+
+<script>
+  const videos = [
+    document.getElementById('test'),
+    document.getElementById('test2'),
+    document.getElementById('test3')
+  ];
+  const timeControl = document.getElementById('time-control');
+
+  // Ensure all videos have loaded metadata to know their durations
+  Promise.all(videos.map(video => new Promise(resolve => video.onloadedmetadata = resolve)))
+    .then(() => {
+      // Set the max time control range based on the shortest video duration
+      const maxDuration = Math.min(...videos.map(video => video.duration));
+      timeControl.max = maxDuration;
+
+      // Synchronize time across videos when the range input changes
+      timeControl.addEventListener('input', () => {
+        const currentTime = parseFloat(timeControl.value);
+        videos.forEach(video => video.currentTime = currentTime);
+      });
+
+      // Sync range input to videos’ current time during playback
+      videos.forEach(video => {
+        video.addEventListener('timeupdate', () => {
+          timeControl.value = video.currentTime;
+        });
+      });
+    });
+
+  // Toggle video visibility
+  document.getElementById('toggle-test').addEventListener('change', (e) => {
+    document.getElementById('test').style.display = e.target.checked ? 'block' : 'none';
+  });
+  document.getElementById('toggle-test2').addEventListener('change', (e) => {
+    document.getElementById('test2').style.display = e.target.checked ? 'block' : 'none';
+  });
+  document.getElementById('toggle-test3').addEventListener('change', (e) => {
+    document.getElementById('test3').style.display = e.target.checked ? 'block' : 'none';
+  });
+</script>
+
+</body>
+</html>

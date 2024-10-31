@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Zoom and Crop with Selection Box</title>
+  <style>
+    /* Container for video to control cropping */
+    .video-container {
+      width: 500px;
+      height: 300px;
+      overflow: hidden;
+      position: relative;
+      cursor: crosshair;
+    }
+
+    /* Video styling */
+    video {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      transform-origin: top left;
+      transition: transform 0.2s ease;
+    }
+
+    /* Selection box styling */
+    .selection-box {
+      position: absolute;
+      border: 2px dashed #00f;
+      background: rgba(0, 0, 255, 0.2);
+      pointer-events: none; /* Ignore pointer events */
+    }
+  </style>
+</head>
+<body>
+
+<div class="video-container" id="videoContainer">
+  <video id="myVideo" src="static/fake_data/test.mp4" autoplay muted loop></video>
+  <div class="selection-box" id="selectionBox" style="display: none;"></div>
+</div>
+
+<script>
+  const videoContainer = document.getElementById("videoContainer");
+  const video = document.getElementById("myVideo");
+  const selectionBox = document.getElementById("selectionBox");
+  let startX, startY, endX, endY;
+
+  // Mouse events for drawing the selection box
+  videoContainer.addEventListener("mousedown", (e) => {
+    startX = e.clientX - videoContainer.getBoundingClientRect().left;
+    startY = e.clientY - videoContainer.getBoundingClientRect().top;
+    selectionBox.style.left = `${startX}px`;
+    selectionBox.style.top = `${startY}px`;
+    selectionBox.style.width = `0px`;
+    selectionBox.style.height = `0px`;
+    selectionBox.style.display = "block";
+
+    // Update selection box size as mouse moves
+    videoContainer.addEventListener("mousemove", resizeSelectionBox);
+  });
+
+  videoContainer.addEventListener("mouseup", (e) => {
+    endX = e.clientX - videoContainer.getBoundingClientRect().left;
+    endY = e.clientY - videoContainer.getBoundingClientRect().top;
+
+    // Stop resizing on mouse up
+    videoContainer.removeEventListener("mousemove", resizeSelectionBox);
+    selectionBox.style.display = "none";
+
+    // Calculate the selected area and apply zoom
+    applyZoomToSelection();
+  });
+
+  function resizeSelectionBox(e) {
+    const currentX = e.clientX - videoContainer.getBoundingClientRect().left;
+    const currentY = e.clientY - videoContainer.getBoundingClientRect().top;
+
+    // Calculate width and height of the selection box
+    const width = Math.abs(currentX - startX);
+    const height = Math.abs(currentY - startY);
+
+    // Set the selection box dimensions
+    selectionBox.style.width = `${width}px`;
+    selectionBox.style.height = `${height}px`;
+
+    // Set the top-left corner position based on drag direction
+    selectionBox.style.left = `${Math.min(currentX, startX)}px`;
+    selectionBox.style.top = `${Math.min(currentY, startY)}px`;
+  }
+
+  function applyZoomToSelection() {
+    // Calculate selected area dimensions as percentages of the container
+    const rect = videoContainer.getBoundingClientRect();
+    const startXPerc = (Math.min(startX, endX) / rect.width) * 100;
+    const startYPerc = (Math.min(startY, endY) / rect.height) * 100;
+    const widthPerc = (Math.abs(endX - startX) / rect.width) * 100;
+    const heightPerc = (Math.abs(endY - startY) / rect.height) * 100;
+
+    // Calculate zoom level to fit the selected area
+    const scale = Math.min(100 / widthPerc, 100 / heightPerc);
+
+    // Apply zoom and translate to center on the selected area
+    const offsetX = `-${startXPerc * scale}%`;
+    const offsetY = `-${startYPerc * scale}%`;
+    video.style.transform = `scale(${scale}) translate(${offsetX}, ${offsetY})`;
+  }
+</script>
+
+<button class="button-3" role="button" onclick="window.location.href='/'">home</button>
+</body>
+</html>
+
+

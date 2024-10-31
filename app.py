@@ -14,6 +14,9 @@ def about():
 def videos():
     return render_template('videos.html')
 
+@app.route('/zoom')
+def zoom():
+    return render_template('zoom.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

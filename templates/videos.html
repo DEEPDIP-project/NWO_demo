@@ -17,11 +17,41 @@
     .control-bar {
       width: 100%;
       margin: 0 auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     .toggle-controls {
       display: flex;
       justify-content: space-around;
       margin-bottom: 10px;
+    }
+    #time-control {
+      width: 80%; /* Make the range input larger */
+      -webkit-appearance: none; /* Remove default styling */
+      appearance: none; /* Remove default styling */
+      height: 10px; /* Height of the track */
+      background: #ddd; /* Track background color */
+      border-radius: 5px; /* Rounded corners for the track */
+      outline: none; /* Remove outline */
+    }
+    #time-control::-webkit-slider-thumb {
+      -webkit-appearance: none; /* Remove default styling */
+      appearance: none; /* Remove default styling */
+      width: 20px; /* Width of the thumb */
+      height: 20px; /* Height of the thumb */
+      background: #4CAF50; /* Thumb background color */
+      border-radius: 50%; /* Make the thumb circular */
+      cursor: pointer; /* Change cursor to pointer */
+      box-shadow: 0 0 2px rgba(0, 0, 0, 0.5); /* Add shadow to the thumb */
+    }
+    #time-control::-moz-range-thumb {
+      width: 20px; /* Width of the thumb */
+      height: 20px; /* Height of the thumb */
+      background: #4CAF50; /* Thumb background color */
+      border-radius: 50%; /* Make the thumb circular */
+      cursor: pointer; /* Change cursor to pointer */
+      box-shadow: 0 0 2px rgba(0, 0, 0, 0.5); /* Add shadow to the thumb */
     }
   </style>
 </head>
@@ -51,6 +81,7 @@
     document.getElementById('test3')
   ];
   const timeControl = document.getElementById('time-control');
+  let isPlaying = true;
 
   // Ensure all videos have loaded metadata to know their durations
   Promise.all(videos.map(video => new Promise(resolve => video.onloadedmetadata = resolve)))
@@ -83,7 +114,21 @@
   document.getElementById('toggle-test3').addEventListener('change', (e) => {
     document.getElementById('test3').style.display = e.target.checked ? 'block' : 'none';
   });
+
+  // Pause/Play videos when interacting with the range input
+  timeControl.addEventListener('mousedown', () => {
+    videos.forEach(video => video.pause());
+    isPlaying = false;
+  });
+
+  timeControl.addEventListener('mouseup', () => {
+    if (!isPlaying) {
+      videos.forEach(video => video.play());
+      isPlaying = true;
+    }
+  });
 </script>
 
+<button class="button-3" role="button" onclick="window.location.href='/zoom'">zoom (test)</button>
 </body>
 </html>
